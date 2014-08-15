@@ -12,14 +12,14 @@
 使用
 ----
 
-   git clone http://github.com/jianingy/fenci
-   cd fenci
-   make
-   mkdir data
-   wget -O data/people-daily.txt.gz https://nlpbamboo.googlecode.com/files/people-daily.txt.gz
-   gunzip data/people-daily.txt.gz
-   out/build -in data/people-daily.txt
-   out/fenci -text 北冰洋汽水真好喝
+    git clone http://github.com/jianingy/fenci
+    cd fenci
+    make
+    mkdir data
+    wget -O data/people-daily.txt.gz https://nlpbamboo.googlecode.com/files/people-daily.txt.gz
+    gunzip data/people-daily.txt.gz
+    out/build -in data/people-daily.txt
+    out/fenci -text 北冰洋汽水真好喝
 
 
 问题
