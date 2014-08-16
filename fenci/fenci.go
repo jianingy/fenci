@@ -9,9 +9,11 @@ package main
 import (
 	"fmt"
 	"os"
+
 	"github.com/codegangsta/cli"
-    . "github.com/jianingy/fenci/core"
+	. "github.com/jianingy/fenci/core"
 )
+
 
 func main() {
 	app := cli.NewApp()
@@ -34,7 +36,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		result, err := seg.DoSentence(c.String("text"))
+		result, err := seg.DoText(c.String("text"))
 		if err != nil {
 			panic(err)
 		}

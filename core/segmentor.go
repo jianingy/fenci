@@ -7,17 +7,59 @@
 package core
 
 import (
-    "strconv"
     "io"
     "math"
+    "strconv"
+    "strings"
+    "unicode"
 
 	"github.com/torbit/cdb"
-
     . "github.com/jianingy/fenci/constants"
 )
 
 type Segmentor struct {
 	db *cdb.Cdb
+}
+
+type Segment struct {
+    Text     string
+    TextType int
+}
+
+func runeType(ch rune) int {
+    switch {
+    case unicode.IsPunct(ch):
+        return TST_PUNCTUATION
+    case unicode.IsDigit(ch):
+        return TST_NUMBER
+    case unicode.IsNumber(ch):
+        return TST_NUMBER
+    case unicode.IsSpace(ch):
+        return TST_WHITESPACE
+    case strings.IndexRune(TOKEN_CHINESE_NUMBER, ch) > -1:
+        return TST_CHINESE_NUMBER
+    default:
+        return TST_HANZI
+    }
+}
+
+func tidy(text []rune) []Segment {
+    var splitted []Segment
+
+    anchor := 0
+    state := TST_HANZI
+	for cursor, ch := range text {
+        current := runeType(ch)
+        if current != state {
+            splitted = append(splitted, Segment{string(text[anchor:cursor]), state})
+            state = current
+            anchor = cursor
+        }
+	}
+
+    splitted = append(splitted, Segment{string(text[anchor:]), state})
+
+    return splitted
 }
 
 // 平滑函数，处理未曾见过的单词的概率
@@ -45,6 +87,25 @@ func (seg *Segmentor) GetInt(text []byte) (int, error) {
     }
 }
 
+func (seg *Segmentor) DoText(text string) ([]string, error) {
+    var result []string
+    clean := tidy([]rune(text))
+
+    for _, segment := range clean {
+        if segment.TextType == TST_HANZI {
+            segs, err := seg.DoSentence(segment.Text)
+            if err != nil {
+                return nil, err
+            }
+            result = append(result, segs...)
+        } else {
+            result = append(result, segment.Text)
+        }
+    }
+
+    return result, nil
+}
+
 func (seg *Segmentor) DoSentence(text string) ([]string, error) {
     var total, maxlen, numwords int
     var err error
@@ -69,7 +130,7 @@ func (seg *Segmentor) DoSentence(text string) ([]string, error) {
     score[0] = math.MaxFloat64
 
 
-    // 开始 DP 找概率最到的组合
+    // 开始 DP 找概率最大的组合
     for i := 0; i < length; i++ {
         boundary := length
         if maxlen + i < length {
