@@ -22,12 +22,12 @@ func main() {
 		cli.StringFlag{
 			Name:  "db",
 			Value: "dict.cdb",
-			Usage: "word dictionary",
+			Usage: "字典文件",
 		},
 		cli.StringFlag{
 			Name:  "text",
 			Value: "",
-			Usage: "text to segment",
+			Usage: "需要分词的句子",
 		},
 	}
 	app.Action = func(c *cli.Context) {

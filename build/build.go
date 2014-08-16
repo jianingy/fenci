@@ -29,12 +29,17 @@ func main() {
         cli.StringFlag{
             Name: "in",
             Value: "people-daily.txt",
-            Usage: "manually segmented dataset ",
+            Usage: "语料库文件",
+        },
+        cli.StringFlag{
+            Name: "user",
+            Value: "user.txt",
+            Usage: "用户自定义词典",
         },
         cli.StringFlag{
             Name: "out",
             Value: "dict.cdb",
-            Usage: "output file ",
+            Usage: "生成的字典文件 ",
         },
     }
     app.Action = func(c *cli.Context) {
@@ -106,6 +111,19 @@ func build(c *cli.Context) {
         fmt.Fprintf(records, "+%d,%d:%s->%s\n",
             len(name), len(value), name, value)
     }
+
+    Log("INFO", "开始插入用户自定义单词\n")
+    // 默认个数为平均值
+    avgcount := strconv.Itoa(total / len(hash))
+    if userdict, err := ioutil.ReadFile(c.String("user")); err == nil {
+        for _, word := range strings.Split(string(userdict), "\n") {
+            if len(word) == 0 { continue }
+            fmt.Fprintf(records, "+%d,%d:%s->%s\n", len(word), len(avgcount), word, avgcount)
+        }
+    } else {
+        Log("INFO", "找不到用户词典 %s， 跳过本步骤\n", c.String("user"))
+    }
+
     // 最后要多一个 “\n” 不然会 panic: EOF
     fmt.Fprintf(records, "\n")
 
